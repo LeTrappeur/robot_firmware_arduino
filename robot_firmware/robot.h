@@ -4,12 +4,37 @@ namespace Rbt
 {
     class Robot
     {
-    public:
+        public:
         Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT)
         {
             initialize();
-            move();
         }
+        
+        void initialize()
+        {
+            startTime = millis();
+            endTime = millis() + RUN_TIME * 1000;
+            move();          
+        }
+        void run()
+        {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - startTime;            
+            int distance = distanceSensor.getDistance();
+            log("state: %s, currentTime: %lu, distance: %u\n", getStateName(state), currentTime, distance);        
+            
+            if(doneRunning(currentTime)){
+              stop();
+              return;
+            }
+            
+            if(obstacleAhead(distance))
+              stop();
+            else
+              move();
+        }
+        
+        protected:        
         void move()
         {
              state = stateMoving;
@@ -24,40 +49,11 @@ namespace Rbt
              rightMotor.setSpeed(0);
         }
         
-        bool isStopped()
-        {
-             return state == stateStopped;
-        }
-        
-        bool obstacleAhead(unsigned int distance)
-        {
-             return (distance <= TOO_CLOSE);
-        }
-        
-        bool doneRunning(unsigned long currentTime)
-        {
-             return (currentTime >= endTime);
-        }
-        
-        void initialize()
-        {
-            state = stateStopped;
-            startTime = millis();
-            endTime = millis() + RUN_TIME * 1000;            
-        }
-        void run()
-        {
-            unsigned long currentTime = millis();
-            unsigned long elapsedTime = currentTime - startTime;            
-            int distance = distanceSensor.getDistance();
-            log("state: %s, currentTime: %ul, distance: %u\n", getStateName(state), currentTime, distance);        
-            
-            if(obstacleAhead(distance))
-              stop();
-            else
-              move();
-        }
-    private:
+        bool isStopped(){return state == stateStopped;}
+        bool obstacleAhead(unsigned int distance){return (distance <= TOO_CLOSE);}        
+        bool doneRunning(unsigned long currentTime){return (currentTime >= endTime);}
+    
+        private:
         enum state_t {stateStopped = 0, stateMoving = 1};
         state_t state;
         
