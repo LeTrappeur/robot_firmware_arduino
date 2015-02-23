@@ -28,6 +28,7 @@ Rbt::Robot robot;
 void setup()
 {
     Serial.begin(9600);
+    Serial.setTimeout(200);
     robot.initialize();
 }
 
