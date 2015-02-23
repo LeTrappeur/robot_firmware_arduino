@@ -42,6 +42,11 @@ namespace Rbt
              rightMotor.setSpeed(255);
         }
         
+        void followObject()
+        {
+             
+        }
+        
         void stop()
         {
              state = stateStopped;
@@ -50,16 +55,18 @@ namespace Rbt
         }
         
         bool isStopped(){return state == stateStopped;}
+        bool isMoving(){return state == stateMoving;}
+        bool isFollowingObject(){return state == stateFollowingObject;}
         bool obstacleAhead(unsigned int distance){return (distance <= TOO_CLOSE);}        
         bool doneRunning(unsigned long currentTime){return (currentTime >= endTime);}
     
         private:
-        enum state_t {stateStopped = 0, stateMoving = 1};
+        enum state_t {stateStopped = 0, stateMoving = 1, stateFollowingObject = 2};
         state_t state;
         
         const char* getStateName(state_t state)
         {
-             static const char* stateNames[] = {"stateStopped", "stateMoving"};  
+             static const char* stateNames[] = {"stateStopped", "stateMoving", "stateFollowingObject"};  
              return stateNames[state];
         }    
         
