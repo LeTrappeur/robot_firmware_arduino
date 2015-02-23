@@ -14,7 +14,7 @@ namespace Rbt
         {
             startTime = millis();
             endTime = millis() + RUN_TIME * 1000;
-            move();          
+            followObject();          
         }
         void run()
         {
@@ -31,7 +31,7 @@ namespace Rbt
             if(obstacleAhead(distance))
               stop();
             else
-              move();
+              followObject();
         }
         
         protected:        
@@ -44,7 +44,17 @@ namespace Rbt
         
         void followObject()
         {
-             
+             if(Serial.available() > 0){
+             int num_received = Serial.parseInt();
+             if(num_received == 2)
+               leftMotor.setSpeed(255);
+             if(num_received == 1)
+                rightMotor.setSpeed(255);
+             if(num_received == 0){
+               rightMotor.setSpeed(0);
+               leftMotor.setSpeed(0);
+             }         
+           }
         }
         
         void stop()

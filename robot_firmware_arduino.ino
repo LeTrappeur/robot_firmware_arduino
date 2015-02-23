@@ -5,7 +5,7 @@
 
 #define TOO_CLOSE 10
 #define MAX_DISTANCE (TOO_CLOSE * 20)
-#define RUN_TIME 10
+#define RUN_TIME 30
 
 #ifdef ENABLE_ADAFRUIT_MOTOR_DRIVER
 #include <AFMotor.h>
