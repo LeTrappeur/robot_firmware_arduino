@@ -23,7 +23,7 @@ Software
 Raspberry
 ---------
 Hardware
-* Raspberry B+
+* Raspberry 2 B
 * Logitech Webcam c170 
 
 Software
