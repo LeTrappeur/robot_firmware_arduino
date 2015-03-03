@@ -6,9 +6,7 @@ namespace Rbt
     {
         public:
         Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT), remoteControl(REMOTE_CONTROL_INIT)
-        {
-            initialize();
-        }
+        {initialize();}
         
         void initialize()
         {
@@ -23,73 +21,97 @@ namespace Rbt
             int distance = distanceSensor.getDistance();
             RemoteControlDriver::command_t remoteCmd;
             bool haveRemoteCmd = remoteControl.getRemoteCommand(remoteCmd);
+            
             log("state: %s, currentTime: %lu, distance: %u remote: (%d,k:%d)\n", getStateName(state), currentTime, distance ,
             haveRemoteCmd, remoteCmd.key);        
                         
             if (isRemoteControlled()) {
-                if (haveRemoteCmd) {
-                    switch (remoteCmd.key) {
-                    case RemoteControlDriver::command_t::keyFollowObject:
-                        followObject();
-                        break;
-                    case RemoteControlDriver::command_t::keyForward:
-                        leftMotor.setSpeed(255);
-                        rightMotor.setSpeed(255);
-                        break;
-                    case RemoteControlDriver::command_t::keyLeft:
-                        leftMotor.setSpeed(255);
-                        rightMotor.setSpeed(-255);
-                        break;
-                    case RemoteControlDriver::command_t::keyRight:
-                        leftMotor.setSpeed(-255);
-                        rightMotor.setSpeed(255);
-                        break;
-                    case RemoteControlDriver::command_t::keyBackward:
-                        stop();
-                        break;
-                    default:
-                        break;
-                    }
-                }
+                if (haveRemoteCmd)
+                    handleRemoteControl(remoteCmd);
+            }      
+            else if(isFollowingObject()){
+              if (haveRemoteCmd && remoteCmd.key == RemoteControlDriver::command_t::keyRemoteControl)
+                    remote();              
+              else if(!obstacleAhead(distance))
+                followObject();
             }
-            
-            if(doneRunning(currentTime)){
+           
+           if(doneRunning(currentTime)){
               stop();
               return;
-            }
-            
-            //if(obstacleAhead(distance))
-              //stop();    
+            }   
         }
         
         protected:        
-        void move()
+        void moveForward()
         {
              state = stateMoving;
              leftMotor.setSpeed(255);
              rightMotor.setSpeed(255);
         }
         
+        void turnLeft()
+        {
+             state = stateTurning;
+             leftMotor.setSpeed(255);
+             rightMotor.setSpeed(-255);
+        }
+        
+        void turnRight()
+        {
+             state = stateTurning;
+             leftMotor.setSpeed(-255);
+             rightMotor.setSpeed(255);
+        }
+        
         void followObject()
         {
+          // Receive serial data from RPI
              if(Serial.available() > 0){
-             int num_received = Serial.parseInt();
-             if(num_received == 2)
-               leftMotor.setSpeed(255);
-             if(num_received == 1)
-                rightMotor.setSpeed(255);
-             if(num_received == 0){
-               rightMotor.setSpeed(0);
-               leftMotor.setSpeed(0);
-             }         
+               int num_received = Serial.parseInt();
+               if(num_received == 2)
+                 leftMotor.setSpeed(255);
+               if(num_received == 1)
+                  rightMotor.setSpeed(255);
+               if(num_received == 0){
+                 rightMotor.setSpeed(0);
+                 leftMotor.setSpeed(0);
+               }         
            }
         }
         
         void remote()
         {
+          state = stateRemoteControlled;
           leftMotor.setSpeed(0);
           rightMotor.setSpeed(0);
-          state = stateRemoteControlled;
+        }
+        
+        void handleRemoteControl(RemoteControlDriver::command_t remoteCmd)
+        {
+          switch (remoteCmd.key) {
+            case RemoteControlDriver::command_t::keyFollowObject:
+                state = stateFollowingObject;
+                break;
+            case RemoteControlDriver::command_t::keyForward:
+                leftMotor.setSpeed(255);
+                rightMotor.setSpeed(255);
+                break;
+            case RemoteControlDriver::command_t::keyLeft:
+                leftMotor.setSpeed(255);
+                rightMotor.setSpeed(-255);
+                break;
+            case RemoteControlDriver::command_t::keyRight:
+                leftMotor.setSpeed(-255);
+                rightMotor.setSpeed(255);
+                break;
+            case RemoteControlDriver::command_t::keyBackward:
+                leftMotor.setSpeed(0);
+                rightMotor.setSpeed(0);
+                break;
+            default:
+                break;
+            }
         }
         
         void stop()
@@ -101,18 +123,19 @@ namespace Rbt
         
         bool isStopped(){return state == stateStopped;}
         bool isMoving(){return state == stateMoving;}
+        bool isTurning(){return state == stateTurning;}
         bool isFollowingObject(){return state == stateFollowingObject;}
         bool isRemoteControlled(){return state == stateRemoteControlled;}
         bool obstacleAhead(unsigned int distance){return (distance <= TOO_CLOSE);}        
         bool doneRunning(unsigned long currentTime){return (currentTime >= endTime);}
     
         private:
-        enum state_t {stateStopped = 0, stateMoving = 1, stateFollowingObject = 2, stateRemoteControlled = 3};
+        enum state_t {stateStopped = 0, stateMoving = 1, stateFollowingObject = 2, stateRemoteControlled = 3, stateTurning = 4};
         state_t state;
         
         const char* getStateName(state_t state)
         {
-             static const char* stateNames[] = {"stateStopped", "stateMoving", "stateFollowingObject", "stateRemoteControlled"};  
+             static const char* stateNames[] = {"stateStopped", "stateMoving", "stateFollowingObject", "stateRemoteControlled", "stateTurning"};  
              return stateNames[state];
         }    
         
