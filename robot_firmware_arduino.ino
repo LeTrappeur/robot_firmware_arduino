@@ -1,4 +1,12 @@
+/* Main - Robot Firmware Arduino */
+
 #define LOGGING
+
+#define BT_RX_PIN 16
+#define BT_TX_PIN 17
+
+#include <SoftwareSerial.h>
+SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN);
 
 #define ENABLE_ADAFRUIT_MOTOR_DRIVER
 #define ENABLE_NEWPING_DISTANCE_SENSOR_DRIVER
@@ -29,6 +37,9 @@ void setup()
 {
     Serial.begin(9600);
     Serial.setTimeout(200);
+    
+    BTSerial.begin(9600);   
+    
     robot.initialize();
 }
 
