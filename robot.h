@@ -5,7 +5,7 @@ namespace Rbt
     class Robot
     {
         public:
-        Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT)
+        Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT), remoteControl(REMOTE_CONTROL_INIT)
         {
             initialize();
         }
@@ -14,24 +14,52 @@ namespace Rbt
         {
             startTime = millis();
             endTime = millis() + RUN_TIME * 1000;
-            followObject();          
+            remote();          
         }
         void run()
         {
             unsigned long currentTime = millis();
             unsigned long elapsedTime = currentTime - startTime;            
             int distance = distanceSensor.getDistance();
-            log("state: %s, currentTime: %lu, distance: %u\n", getStateName(state), currentTime, distance);        
+            RemoteControlDriver::command_t remoteCmd;
+            bool haveRemoteCmd = remoteControl.getRemoteCommand(remoteCmd);
+            log("state: %s, currentTime: %lu, distance: %u remote: (%d,k:%d)\n", getStateName(state), currentTime, distance ,
+            haveRemoteCmd, remoteCmd.key);        
+                        
+            if (isRemoteControlled()) {
+                if (haveRemoteCmd) {
+                    switch (remoteCmd.key) {
+                    case RemoteControlDriver::command_t::keyFollowObject:
+                        followObject();
+                        break;
+                    case RemoteControlDriver::command_t::keyForward:
+                        leftMotor.setSpeed(255);
+                        rightMotor.setSpeed(255);
+                        break;
+                    case RemoteControlDriver::command_t::keyLeft:
+                        leftMotor.setSpeed(255);
+                        rightMotor.setSpeed(-255);
+                        break;
+                    case RemoteControlDriver::command_t::keyRight:
+                        leftMotor.setSpeed(-255);
+                        rightMotor.setSpeed(255);
+                        break;
+                    case RemoteControlDriver::command_t::keyBackward:
+                        stop();
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
             
             if(doneRunning(currentTime)){
               stop();
               return;
             }
             
-            if(obstacleAhead(distance))
-              stop();
-            else
-              followObject();
+            //if(obstacleAhead(distance))
+              //stop();    
         }
         
         protected:        
@@ -57,6 +85,13 @@ namespace Rbt
            }
         }
         
+        void remote()
+        {
+          leftMotor.setSpeed(0);
+          rightMotor.setSpeed(0);
+          state = stateRemoteControlled;
+        }
+        
         void stop()
         {
              state = stateStopped;
@@ -67,16 +102,17 @@ namespace Rbt
         bool isStopped(){return state == stateStopped;}
         bool isMoving(){return state == stateMoving;}
         bool isFollowingObject(){return state == stateFollowingObject;}
+        bool isRemoteControlled(){return state == stateRemoteControlled;}
         bool obstacleAhead(unsigned int distance){return (distance <= TOO_CLOSE);}        
         bool doneRunning(unsigned long currentTime){return (currentTime >= endTime);}
     
         private:
-        enum state_t {stateStopped = 0, stateMoving = 1, stateFollowingObject = 2};
+        enum state_t {stateStopped = 0, stateMoving = 1, stateFollowingObject = 2, stateRemoteControlled = 3};
         state_t state;
         
         const char* getStateName(state_t state)
         {
-             static const char* stateNames[] = {"stateStopped", "stateMoving", "stateFollowingObject"};  
+             static const char* stateNames[] = {"stateStopped", "stateMoving", "stateFollowingObject", "stateRemoteControlled"};  
              return stateNames[state];
         }    
         
@@ -86,5 +122,6 @@ namespace Rbt
         Motor leftMotor;
         Motor rightMotor;
         DistanceSensor distanceSensor;
+        RemoteControl remoteControl;
     };
 };
