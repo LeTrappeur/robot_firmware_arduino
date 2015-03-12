@@ -1,6 +1,5 @@
 /* Main - Robot Firmware Arduino */
 
-#define LOGGING
 
 #define ENABLE_ADAFRUIT_MOTOR_DRIVER
 #define ENABLE_NEWPING_DISTANCE_SENSOR_DRIVER
@@ -8,7 +7,7 @@
 
 #define TOO_CLOSE 10
 #define MAX_DISTANCE (TOO_CLOSE * 20)
-#define RUN_TIME 60
+#define RUN_TIME 90
 
 #ifdef ENABLE_ADAFRUIT_MOTOR_DRIVER
 #include <AFMotor.h>
@@ -39,9 +38,7 @@ Rbt::Robot robot;
 
 void setup()
 {
-    Serial.begin(9600);
-    Serial.setTimeout(200);
-    
+    Serial.begin(9600);    
     BTSerial.begin(9600);   
     
     robot.initialize();

@@ -12,7 +12,7 @@ namespace Rbt
         {
             startTime = millis();
             endTime = millis() + RUN_TIME * 1000;
-            remote();          
+            remote();    
         }
         void run()
         {
@@ -31,9 +31,9 @@ namespace Rbt
             }      
             else if(isFollowingObject()){
               if (haveRemoteCmd && remoteCmd.key == RemoteControlDriver::command_t::keyRemoteControl)
-                    remote();              
-              else if(!obstacleAhead(distance))
-                followObject();
+                    remote();
+             else if(!obstacleAhead(distance))
+               followObject();        
             }
            
            if(doneRunning(currentTime)){
@@ -67,17 +67,20 @@ namespace Rbt
         void followObject()
         {
           // Receive serial data from RPI
-             if(Serial.available() > 0){
-               int num_received = Serial.parseInt();
-               if(num_received == 2)
+             if(Serial.available() <= 0){
+               return;
+             }
+             else{              
+               char num_received = Serial.read();
+               if(num_received == '2')
                  leftMotor.setSpeed(255);
-               if(num_received == 1)
-                  rightMotor.setSpeed(255);
-               if(num_received == 0){
+               else if(num_received == '1')
+                 rightMotor.setSpeed(255);
+               else if(num_received == '0'){
                  rightMotor.setSpeed(0);
                  leftMotor.setSpeed(0);
-               }         
-           }
+               }
+             }      
         }
         
         void remote()
