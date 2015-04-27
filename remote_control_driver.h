@@ -1,3 +1,6 @@
+#ifndef REMOTECONTROLDRIVER_H
+#define REMOTECONTROLDRIVER_H
+
 namespace Rbt
 {
   class RemoteControlDriver
@@ -13,3 +16,5 @@ namespace Rbt
         virtual bool getRemoteCommand(command_t& cmd) = 0;
   };
 };
+
+#endif

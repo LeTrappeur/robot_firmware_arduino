@@ -2,22 +2,21 @@
 
 namespace Rbt
 {
-    class BluestickRemoteControl : public RemoteControlDriver
+    class RaspberryRemoteControl : public RemoteControlDriver
     {
     public:
         /**
           * @brief Class constructor.
           */
-        BluestickRemoteControl() : RemoteControlDriver(), lastKey(command_t::keyNone) {}
+        RaspberryRemoteControl() : RemoteControlDriver() {}
 
         virtual bool getRemoteCommand(command_t& cmd)
         {
-            //cmd.stop();
             cmd.key = command_t::keyNone;
 
-            if (BTSerial.available() <= 0)
+            if (Serial.available() <= 0)
                 return false; // no commands available
-            char ch = BTSerial.read();
+            char ch = Serial.read();
             switch (ch) {
                 case '8': // up
                     cmd.key = command_t::keyForward;
@@ -48,15 +47,12 @@ namespace Rbt
                 default:
                     break;
             }
-            if (cmd.key != command_t::keyNone && cmd.key == lastKey) {
-                // repeated key, ignore it
+            if (cmd.key != command_t::keyNone) {
                 return false;
             }
-            lastKey = cmd.key;
             return true;
         }
 
     private:
-        command_t::key_t lastKey;
     };
 };

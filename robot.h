@@ -5,7 +5,7 @@ namespace Rbt
     class Robot
     {
         public:
-        Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT), remoteControl(REMOTE_CONTROL_INIT)
+        Robot(): leftMotor(LEFT_MOTOR_INIT), rightMotor(RIGHT_MOTOR_INIT), distanceSensor(DISTANCE_SENSOR_INIT), bluestickRemoteControl(BLUESTICK_REMOTE_CONTROL_INIT)
         {initialize();}
         
         void initialize()
@@ -20,7 +20,7 @@ namespace Rbt
             unsigned long elapsedTime = currentTime - startTime;            
             int distance = distanceSensor.getDistance();
             RemoteControlDriver::command_t remoteCmd;
-            bool haveRemoteCmd = remoteControl.getRemoteCommand(remoteCmd);
+            bool haveRemoteCmd = bluestickRemoteControl.getRemoteCommand(remoteCmd);
             
             log("state: %s, currentTime: %lu, distance: %u remote: (%d,k:%d)\n", getStateName(state), currentTime, distance ,
             haveRemoteCmd, remoteCmd.key);        
@@ -148,6 +148,6 @@ namespace Rbt
         Motor leftMotor;
         Motor rightMotor;
         DistanceSensor distanceSensor;
-        RemoteControl remoteControl;
+        BluestickRemoteControl bluestickRemoteControl;
     };
 };

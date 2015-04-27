@@ -4,6 +4,7 @@
 #define ENABLE_ADAFRUIT_MOTOR_DRIVER
 #define ENABLE_NEWPING_DISTANCE_SENSOR_DRIVER
 #define ENABLE_BLUESTICK_REMOTE_CONTROL_DRIVER
+#define ENABLE_RASPBERRY_REMOTE_CONTROL_DRIVER
 
 #define TOO_CLOSE 10
 #define MAX_DISTANCE (TOO_CLOSE * 20)
@@ -28,7 +29,12 @@
 #define BT_TX_PIN 17
 SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN);
 #include "bluestick_remote_control_driver.h"
-#define REMOTE_CONTROL_INIT
+#define BLUESTICK_REMOTE_CONTROL_INIT
+#endif
+
+#ifdef ENABLE_RASPBERRY_REMOTE_CONTROL_DRIVER
+#include "raspberry_remote_control_driver.h"
+#define RASPBERRY_REMOTE_REMOTE_CONTROL_INIT
 #endif
 
 #include "logging.h"
