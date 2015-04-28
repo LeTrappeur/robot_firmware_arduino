@@ -34,7 +34,7 @@ SoftwareSerial BTSerial(BT_RX_PIN, BT_TX_PIN);
 
 #ifdef ENABLE_RASPBERRY_REMOTE_CONTROL_DRIVER
 #include "raspberry_remote_control_driver.h"
-#define RASPBERRY_REMOTE_REMOTE_CONTROL_INIT
+#define RASPBERRY_REMOTE_CONTROL_INIT
 #endif
 
 #include "logging.h"
@@ -44,9 +44,9 @@ Rbt::Robot robot;
 
 void setup()
 {
-    Serial.begin(9600);    
-    BTSerial.begin(9600);   
-    
+    Serial.begin(9600);
+    BTSerial.begin(9600);
+
     robot.initialize();
 }
 
