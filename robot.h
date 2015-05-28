@@ -85,6 +85,10 @@ namespace Rbt
                 rightMotor.setSpeed(255);
                 break;
             case RemoteControlDriver::command_t::keyBackward:
+                leftMotor.setSpeed(-255);
+                rightMotor.setSpeed(-255);
+                break;
+            case RemoteControlDriver::command_t::keyStop:
                 leftMotor.setSpeed(0);
                 rightMotor.setSpeed(0);
                 break;
