@@ -5,10 +5,11 @@
 #define ENABLE_NEWPING_DISTANCE_SENSOR_DRIVER
 #define ENABLE_BLUESTICK_REMOTE_CONTROL_DRIVER
 #define ENABLE_RASPBERRY_REMOTE_CONTROL_DRIVER
+#define LOGGING
 
 #define TOO_CLOSE 10
 #define MAX_DISTANCE (TOO_CLOSE * 20)
-#define RUN_TIME 90
+#define RUN_TIME 900
 
 #ifdef ENABLE_ADAFRUIT_MOTOR_DRIVER
 #include <AFMotor.h>
@@ -44,6 +45,7 @@ Rbt::Robot robot;
 
 void setup()
 {
+    
     Serial.begin(9600);
     BTSerial.begin(9600);
 

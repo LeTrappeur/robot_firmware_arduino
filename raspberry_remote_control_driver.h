@@ -8,7 +8,7 @@ namespace Rbt
         /**
           * @brief Class constructor.
           */
-        RaspberryRemoteControl() : RemoteControlDriver() {}
+        RaspberryRemoteControl() : RemoteControlDriver(), lastKey(command_t::keyNone) {}
 
         virtual bool getRemoteCommand(command_t& cmd)
         {
@@ -30,6 +30,9 @@ namespace Rbt
                 case '6': // right
                     cmd.key = command_t::keyRight;
                     break;
+                case '0': // stop
+                    cmd.key = command_t::keyStop;
+                    break;
                 case 'A': // function key #1
                 case 'C':
                     cmd.key = command_t::keyFollowObject;
@@ -47,12 +50,15 @@ namespace Rbt
                 default:
                     break;
             }
-            if (cmd.key != command_t::keyNone) {
+            if (cmd.key != command_t::keyNone && cmd.key == lastKey) {
+                // repeated key, ignore it
                 return false;
             }
+            lastKey = cmd.key;
             return true;
         }
 
     private:
+    command_t::key_t lastKey;
     };
 };
