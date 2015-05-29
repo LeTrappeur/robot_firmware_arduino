@@ -13,6 +13,8 @@ namespace Rbt
         {
             startTime = millis();
             endTime = millis() + RUN_TIME * 1000;
+            leftMotor.setSpeed(0);
+            rightMotor.setSpeed(0);
             remote();
         }
         void run()
@@ -20,15 +22,17 @@ namespace Rbt
             unsigned long currentTime = millis();
             unsigned long elapsedTime = currentTime - startTime;
             int distance = distanceSensor.getDistance();
-            RemoteControlDriver::command_t remoteCmd;
-            bool haveRemoteCmd = bluestickRemoteControl.getRemoteCommand(remoteCmd) || raspberryRemoteControl.getRemoteCommand(remoteCmd);
+            RemoteControlDriver::command_t remoteCmdRaspberry, remoteCmdBluestick;
+            bool haveRemoteCmd = bluestickRemoteControl.getRemoteCommand(remoteCmdBluestick) || raspberryRemoteControl.getRemoteCommand(remoteCmdRaspberry);
 
             log("state: %s, currentTime: %lu, distance: %u remote: (%d,k:%d)\n", getStateName(state), currentTime, distance ,
-            haveRemoteCmd, remoteCmd.key);
+            haveRemoteCmd, remoteCmdBluestick.key, remoteCmdRaspberry.key);
 
             if (isRemoteControlled()) {
-                if (haveRemoteCmd)
-                    handleRemoteControl(remoteCmd);
+                if (haveRemoteCmd){
+                    handleRemoteControl(remoteCmdRaspberry); // Rpi first
+                    handleRemoteControl(remoteCmdBluestick);
+                    }
             }
 
            if(doneRunning(currentTime)){
@@ -40,30 +44,37 @@ namespace Rbt
         protected:
         void moveForward()
         {
-             state = stateMoving;
              leftMotor.setSpeed(255);
              rightMotor.setSpeed(255);
+        }
+        
+        void moveBackward()
+        {
+             leftMotor.setSpeed(-255);
+             rightMotor.setSpeed(-255);
         }
 
         void turnLeft()
         {
-             state = stateTurning;
              leftMotor.setSpeed(255);
              rightMotor.setSpeed(-255);
         }
 
         void turnRight()
         {
-             state = stateTurning;
              leftMotor.setSpeed(-255);
              rightMotor.setSpeed(255);
         }
-
+        
+        void brake()
+        {
+             leftMotor.setSpeed(0);
+             rightMotor.setSpeed(0);
+        }
+        
         void remote()
         {
-          state = stateRemoteControlled;
-          leftMotor.setSpeed(0);
-          rightMotor.setSpeed(0);
+             state = stateRemoteControlled;
         }
 
         void handleRemoteControl(RemoteControlDriver::command_t remoteCmd)
@@ -73,20 +84,16 @@ namespace Rbt
                 state = stateFollowingObject;
                 break;
             case RemoteControlDriver::command_t::keyForward:
-                leftMotor.setSpeed(255);
-                rightMotor.setSpeed(255);
+                moveForward();
                 break;
             case RemoteControlDriver::command_t::keyLeft:
-                leftMotor.setSpeed(255);
-                rightMotor.setSpeed(-255);
+                turnLeft();
                 break;
             case RemoteControlDriver::command_t::keyRight:
-                leftMotor.setSpeed(-255);
-                rightMotor.setSpeed(255);
+                turnRight();
                 break;
             case RemoteControlDriver::command_t::keyBackward:
-                leftMotor.setSpeed(0);
-                rightMotor.setSpeed(0);
+                moveBackward();
                 break;
             default:
                 break;
